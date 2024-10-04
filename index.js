@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const dns = require('dns');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const app = express();
@@ -24,9 +25,17 @@ app.get('/api/hello', function(req, res) {
 });
 
 app.post("/api/shorturl", function(req, res){
-  res.json({
-    original_url:"",
-    short_url:""
+  dns.lookup(req.body.url,function(err,address,family){
+    console.log(err)
+    if(err.code=="ENOTFOUND"){
+      res.json({error: "invalid url"})
+    }
+    else{
+      res.json({
+        original_url:req.body.url,
+        short_url:""
+      })
+    }
   })
 });
 
