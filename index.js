@@ -34,24 +34,51 @@ app.get('/api/hello', function (req, res) {
 
 app.post("/api/shorturl", function (req, res) {
   dns.lookup(req.body.url, function (err, address, family) {
+
     if (err != null) {
       res.json({ error: "invalid url" })
     }
     else {
+      oldURL = req.body.url;
+      if (!oldURL.includes("https://")) {
+        oldURL = "https://" + oldURL
+      }
       Url.countDocuments().then(count => {
         var original = new Url({
           _id: count,
-          originalUrl: req.body.url
+          originalUrl: oldURL
         })
         original.save().then((saved => { saved === original }));
         res.json({
-          original_url: req.body.url,
+          original_url: oldURL,
           short_url: count
         })
       })
     }
   })
 });
+
+app.get("/api/shorturl/:shortUrl", function (req, res) {
+  var shortUrl = req.params.shortUrl;
+  try {
+    if (!Number.isInteger(shortUrl)) {
+      shortUrl = Number.parseInt(shortUrl)
+    }
+  } catch {
+
+  }
+  console.log(shortUrl)
+  if (Number.isInteger(shortUrl)) {
+    console.log("c")
+    Url.findById(shortUrl).then(origUrl => {
+      var redirect = origUrl.originalUrl;
+      console.log(redirect)
+      res.redirect(301, redirect)
+    })
+  }
+
+}
+)
 
 app.listen(port, function () {
   console.log(`Listening on port ${port}`);
