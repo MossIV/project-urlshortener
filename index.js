@@ -33,29 +33,33 @@ app.get('/api/hello', function (req, res) {
 });
 
 app.post("/api/shorturl", function (req, res) {
-  dns.lookup(req.body.url, function (err, address, family) {
-
-    if (err != null) {
-      res.json({ error: "invalid url" })
-    }
-    else {
-      oldURL = req.body.url;
-      if (!oldURL.includes("https://")) {
-        oldURL = "https://" + oldURL
+  var url = req.body.url;
+  console.log("a")
+  if(!url.includes("https://")){
+    console.log("b")
+    res.json({error: "invalid url"})
+  }else{
+    var urlDNS = url.substring(8)
+    dns.lookup(urlDNS, function (err, address, family){
+      if (err != null) {
+        console.log(err)
+        res.json({ error: "invalid url" })
+      }else{
+        Url.countDocuments().then(count => {
+          var original = new Url({
+            _id: count,
+            originalUrl: url
+          })
+          original.save().then((saved => { saved === original }));
+          res.json({
+            original_url: url,
+            short_url: count
+          })
+        })
       }
-      Url.countDocuments().then(count => {
-        var original = new Url({
-          _id: count,
-          originalUrl: oldURL
-        })
-        original.save().then((saved => { saved === original }));
-        res.json({
-          original_url: oldURL,
-          short_url: count
-        })
-      })
-    }
-  })
+    })
+  }
+  
 });
 
 app.get("/api/shorturl/:shortUrl", function (req, res) {
