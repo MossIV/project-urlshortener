@@ -38,16 +38,13 @@ app.post("/api/shorturl", function (req, res) {
   if(!url.includes("https://") && !url.includes("http://")){
     res.json({error: "invalid url"})
   }else{
-    if(url.includes("http://")){
-      var urlDNS = url.substring(7)
-    }else{
-      var urlDNS = url.substring(8)
-    }
-    // dns.lookup(urlDNS, function (err, address, family){
-    //   if (err != null) {
-    //     console.log(err)
-    //     res.json({ error: "invalid url" })
-    //   }else{
+      var urlDNS = url.split("/")
+      var urlDNS = urlDNS[2].split(":")
+    dns.lookup(urlDNS[0], function (err, address, family){
+      if (err != null) {
+        console.log(err)
+        res.json({ error: "invalid url" })
+      }else{
         Url.countDocuments().then(count => {
           var original = new Url({
             _id: count,
@@ -61,9 +58,9 @@ app.post("/api/shorturl", function (req, res) {
         })
       }
     })
-  // }
+  }
   
-// });
+});
 
 app.get("/api/shorturl/:shortUrl", function (req, res) {
   var shortUrl = req.params.shortUrl;
