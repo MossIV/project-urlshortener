@@ -34,7 +34,6 @@ app.get('/api/hello', function (req, res) {
 
 app.post("/api/shorturl", function (req, res) {
   var url = req.body.url;
-  console.log(url)
   if(!url.includes("https://") && !url.includes("http://")){
     res.json({error: "invalid url"})
   }else{
@@ -71,12 +70,9 @@ app.get("/api/shorturl/:shortUrl", function (req, res) {
   } catch {
 
   }
-  console.log(shortUrl)
   if (Number.isInteger(shortUrl)) {
-    console.log("c")
     Url.findById(shortUrl).then(origUrl => {
       var redirect = origUrl.originalUrl;
-      console.log(redirect)
       res.redirect(301, redirect)
     })
   }
